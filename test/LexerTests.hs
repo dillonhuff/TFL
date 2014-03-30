@@ -18,6 +18,10 @@ tests = TestList
 	,lexer_if
 	,lexer_then
 	,lexer_else
+	,lexer_lparen
+	,lexer_rparen
+	,lexer_lambda
+	,lexer_dot
 	,lexer_overlapResAndId
 	,lexer_plus
 	,lexer_minus
@@ -61,6 +65,18 @@ lexer_then =
 
 lexer_else =
 	tokenTest "else" [ELSE]
+
+lexer_lparen =
+	tokenTest "(" [LPAREN]
+
+lexer_rparen =
+	tokenTest ")" [RPAREN]
+
+lexer_lambda =
+	tokenTest "\\" [LAMBDA]
+
+lexer_dot =
+	tokenTest "." [DOT]
 
 lexer_overlapResAndId =
 	tokenTest "letter" [(I "letter")]

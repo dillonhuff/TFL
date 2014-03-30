@@ -1,7 +1,7 @@
 module Lexer(
 	PosTok(PT), tok, pos, dummyPosTok,
 	lexer,
-	Tok(I, Num, Op, Boolean, LET, EQUAL, IN, IF, THEN, ELSE),
+	Tok(I, Num, Op, Boolean, LET, EQUAL, IN, IF, THEN, ELSE, LPAREN, RPAREN, LAMBDA, DOT),
 	isOpTok, isNumTok, isIdTok, isBoolTok) where
 
 import ErrorHandling
@@ -41,6 +41,10 @@ data Tok
 	| IF
 	| THEN
 	| ELSE
+	| LPAREN
+	| RPAREN
+	| LAMBDA
+	| DOT
 	deriving (Eq, Show)
 
 isOpTok (Op _) = True
@@ -57,7 +61,8 @@ isBoolTok _ = False
 
 resToTok =
 	[("let", LET), ("=", EQUAL), ("in", IN), ("if", IF)
-	,("then", THEN), ("else", ELSE)]
+	,("then", THEN), ("else", ELSE), ("(", LPAREN)
+	,(")", RPAREN), ("\\", LAMBDA), (".", DOT)]
 
 lexer :: String -> ThrowsError [PosTok]
 lexer str = case parse pToks "TFL" str of
@@ -112,6 +117,10 @@ pId = do
 
 pResName = do
 	rName <- string "="
+		<|> string "\\"
+		<|> string "."
+		<|> string "("
+		<|> string ")"
 	return rName
 
 pBool = do
