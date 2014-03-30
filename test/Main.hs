@@ -1,3 +1,6 @@
 module Main(main) where
 
-main = putStrLn "Nooooooo"
+import LexerTests
+
+main = do
+	allLexerTests
