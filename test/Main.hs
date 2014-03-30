@@ -4,3 +4,4 @@ import LexerTests
 
 main = do
 	allLexerTests
+	allParserTests

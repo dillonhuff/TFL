@@ -1,9 +1,11 @@
 module Lexer(
-	tok, pos,
+	PosTok(PT), tok, pos, dummyPosTok,
 	lexer,
-	Tok(I, Num, Op, Boolean, LET, EQUAL, IN, IF, THEN, ELSE)) where
+	Tok(I, Num, Op, Boolean, LET, EQUAL, IN, IF, THEN, ELSE),
+	isOpTok, isNumTok, isIdTok, isBoolTok) where
 
 import ErrorHandling
+import Text.Parsec.Pos
 import Text.ParserCombinators.Parsec
 
 data PosTok = PT Tok SourcePos
@@ -19,6 +21,9 @@ tok (PT t _) = t
 
 pos :: PosTok -> SourcePos
 pos (PT _ p) = p
+
+dummyPosTok :: Tok -> PosTok
+dummyPosTok t = PT t (newPos "DUMMY" 0 0)
 
 instance Eq PosTok where
 	(==) = ptEq
@@ -37,6 +42,18 @@ data Tok
 	| THEN
 	| ELSE
 	deriving (Eq, Show)
+
+isOpTok (Op _) = True
+isOpTok _ = False
+
+isIdTok (I _) = True
+isIdTok _ = False
+
+isNumTok (Num _) = True
+isNumTok _ = False
+
+isBoolTok (Boolean _) = True
+isBoolTok _ = False
 
 resToTok =
 	[("let", LET), ("=", EQUAL), ("in", IN), ("if", IF)
