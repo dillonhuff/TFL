@@ -54,6 +54,7 @@ pToks = do
 
 pTok = do
 	t <- pNum
+		<|> try pOp
 		<|> pIdentOrRes
 		<|> pBool
 	return t
@@ -62,6 +63,22 @@ pNum = do
 	pos <- getPosition
 	digs <- many1 digit
 	return $ PT (Num $ read digs) pos
+
+pOp = do
+	pos <- getPosition
+	op <- string "+"
+		<|> string "-"
+		<|> string "*"
+		<|> string "/"
+		<|> string "=="
+		<|> try (string "<=")
+		<|> try (string ">=")
+		<|> string "<"
+		<|> string ">"
+		<|> string "~"
+		<|> string "&&"
+		<|> string "||"
+	return $ PT (Op op) pos
 
 pIdentOrRes = do
 	pos <- getPosition

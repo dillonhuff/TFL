@@ -18,7 +18,19 @@ tests = TestList
 	,lexer_if
 	,lexer_then
 	,lexer_else
-	,lexer_overlapResAndId]
+	,lexer_overlapResAndId
+	,lexer_plus
+	,lexer_minus
+	,lexer_times
+	,lexer_divide
+	,lexer_eqeq
+	,lexer_lte
+	,lexer_gte
+	,lexer_lt
+	,lexer_gt
+	,lexer_not
+	,lexer_and
+	,lexer_or]
 
 lexer_Number =
 	tokenTest "1239" [(Num 1239)]
@@ -52,6 +64,42 @@ lexer_else =
 
 lexer_overlapResAndId =
 	tokenTest "letter" [(I "letter")]
+
+lexer_plus =
+	tokenTest "+" [(Op "+")]
+
+lexer_minus =
+	tokenTest "-" [(Op "-")]
+
+lexer_times =
+	tokenTest "*" [(Op "*")]
+
+lexer_divide =
+	tokenTest "/" [(Op "/")]
+
+lexer_eqeq =
+	tokenTest "==" [(Op "==")]
+
+lexer_lte =
+	tokenTest "<=" [(Op "<=")]
+
+lexer_gte =
+	tokenTest ">=" [(Op ">=")]
+
+lexer_lt =
+	tokenTest "<" [(Op "<")]
+
+lexer_gt =
+	tokenTest ">" [(Op ">")]
+
+lexer_not =
+	tokenTest "~" [(Op "~")]
+
+lexer_and =
+	tokenTest "&&" [(Op "&&")]
+
+lexer_or =
+	tokenTest "||" [(Op "||")]
 
 tokenTest input expected = TestCase
 	(assertEqual ("Input: " ++ show input)
