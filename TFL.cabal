@@ -17,11 +17,11 @@ cabal-version:       >=1.8
 executable TFL
   main-is:             Main.hs
   -- other-modules:       
-  build-depends:       base ==4.6.*
+  build-depends:       base ==4.6.*, parsec, mtl
   hs-source-dirs:      src
 
 executable TFL-tests
   main-is:             Main.hs
   -- other-modules:       
-  build-depends:       base ==4.6.*
+  build-depends:       base ==4.6.*, HUnit, parsec, mtl
   hs-source-dirs:      test, src
