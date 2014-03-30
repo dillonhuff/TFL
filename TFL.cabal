@@ -20,8 +20,8 @@ executable TFL
   build-depends:       base ==4.6.*
   hs-source-dirs:      src
 
- executable TFL-ts
+executable TFL-tests
   main-is:             Main.hs
   -- other-modules:       
   build-depends:       base ==4.6.*
-  hs-source-dirs:      test, src
+  hs-source-dirs:      test
