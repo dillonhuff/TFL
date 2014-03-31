@@ -14,8 +14,11 @@ tests = TestList
 	,parseExpr_BoolExprTrue
 	,parseExpr_BoolExprFalse
 	,parseExpr_parenExpr
-	,parseExpr_lambdaExpr
-	,parseExpr_absExpr]
+	,parseExpr_absExpr
+	,parseExpr_apExpr
+	,parseExpr_multiApExpr
+	,parseExpr_ifExpr
+	,parseExpr_letExpr]
 
 parseExpr_IExpr =
 	parseExprTest "n12" (dummyIExpr "n12")
@@ -32,17 +35,35 @@ parseExpr_BoolExprTrue =
 parseExpr_BoolExprFalse =
 	parseExprTest "False" (dummyBoolExpr False)
 
-parseExpr_lambdaExpr =
+parseExpr_absExpr =
 	parseExprTest "\\ x . (x 12)"
 		(dummyAbsExpr "x" $
 			ap (dummyIExpr "x") (dummyNumExpr 12))
 
-parseExpr_absExpr =
+parseExpr_apExpr =
 	parseExprTest "(12 True)"
 		(ap (dummyNumExpr 12) (dummyBoolExpr True))
 
+parseExpr_multiApExpr =
+	parseExprTest "x 12 (13 False)"
+		(ap
+			(ap (dummyIExpr "x") (dummyNumExpr 12))
+			(ap (dummyNumExpr 13) (dummyBoolExpr False)))
+
 parseExpr_parenExpr =
 	parseExprTest "(n12)" (dummyIExpr "n12")
+
+parseExpr_ifExpr =
+	parseExprTest "if True then 12 else (- 1)"
+		(ifExpr (dummyBoolExpr True)
+			(dummyNumExpr 12)
+			(ap (dummyOpExpr "-") (dummyNumExpr 1)))
+
+parseExpr_letExpr =
+	parseExprTest "let x = 34 in (\\y. (+ x 2) y)"
+		(letExpr (dummyIExpr "x") (dummyNumExpr 34)
+			(dummyAbsExpr "y"
+				(ap (ap (ap (dummyOpExpr "+") (dummyIExpr "x")) (dummyNumExpr 2)) (dummyIExpr "y"))))
 
 parseExprTest input expected = TestCase
 	(assertEqual ("Input: " ++ show input)

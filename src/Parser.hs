@@ -1,6 +1,7 @@
 module Parser(
 	parseExpr,
-	dummyIExpr, dummyOpExpr, dummyNumExpr, dummyBoolExpr, dummyAbsExpr, ap) where
+	dummyIExpr, dummyOpExpr, dummyNumExpr,
+	dummyBoolExpr, dummyAbsExpr, ifExpr, letExpr, ap) where
 
 import ErrorHandling
 import Lexer
@@ -13,6 +14,8 @@ data Expr
 	| BoolExpr PosTok
 	| AbsExpr Expr Expr
 	| ApExpr Expr Expr
+	| IfExpr Expr Expr Expr
+	| LetExpr Expr Expr Expr
 	deriving (Eq, Show)
 
 dummyIExpr :: String -> Expr
@@ -30,6 +33,12 @@ dummyBoolExpr val = BoolExpr (dummyPosTok (Boolean val))
 dummyAbsExpr :: String -> Expr -> Expr
 dummyAbsExpr name term = AbsExpr (dummyIExpr name) term
 
+ifExpr :: Expr -> Expr -> Expr -> Expr
+ifExpr cond e1 e2 = IfExpr cond e1 e2
+
+letExpr :: Expr -> Expr -> Expr -> Expr
+letExpr ident sub e = LetExpr ident sub e
+
 ap :: Expr -> Expr -> Expr
 ap t1 t2 = ApExpr t1 t2
 
@@ -40,36 +49,31 @@ parseExpr programText = case lexer programText of
 		Left err -> Left $ Parse err
 		Right expr -> Right expr
 
+pParens toParse = do
+	tflTok LPAREN
+	v <- toParse
+	tflTok RPAREN
+	return v
+
 pExpr = do
-	expr <- pParenSEExpr
-		<|> pSEExpr
-		<|> pSExpr
-	return expr
+	exprs <- many1 pSExpr
+	return $ multiExpr exprs
+
+pApExpr = do
+	sExpr <- pSExpr
+	expr <- pExpr
+	return $ ApExpr sExpr expr
+
 
 pSExpr = do
-	expr <- pParenExpr
+	expr <- pParens pExpr
 		<|> pIExpr
 		<|> pOpExpr
 		<|> pNumExpr
 		<|> pBoolExpr
 		<|> pAbsExpr
-	return expr
-
-pParenSEExpr = do
-	tflTok LPAREN
-	psexpr <- pSEExpr
-	tflTok RPAREN
-	return $ psexpr
-
-pSEExpr = do
-	sExpr <- pSEExpr
-	expr <- pExpr
-	return $ ap sExpr expr
-
-pParenExpr = do
-	tflTok LPAREN
-	expr <- pExpr
-	tflTok RPAREN
+		<|> pIfExpr
+		<|> pLetExpr
 	return expr
 
 pIExpr = do
@@ -94,6 +98,29 @@ pAbsExpr = do
 	tflTok DOT
 	expr <- pExpr
 	return $ AbsExpr v expr
+
+pIfExpr = do
+	tflTok IF
+	cond <- pExpr
+	tflTok THEN
+	e1 <- pExpr
+	tflTok ELSE
+	e2 <- pExpr
+	return $ IfExpr cond e1 e2
+
+pLetExpr = do
+	tflTok LET
+	var <- pIExpr
+	tflTok EQUAL
+	sub <- pExpr
+	tflTok IN
+	e <- pExpr
+	return $ LetExpr var sub e
+
+multiExpr :: [Expr] -> Expr
+multiExpr [] = error "No expressions in input"
+multiExpr [e] = e
+multiExpr (e1:e2:rest) = foldl ap (ap e1 e2) rest
 
 opTok :: (Monad m) => ParsecT [PosTok] u m PosTok
 opTok = tokenPrim show updatePos opTok
