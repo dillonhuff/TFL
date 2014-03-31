@@ -1,5 +1,7 @@
 module Parser(
+	position,
 	parseExpr,
+	Expr(IExpr, OpExpr, NumExpr, BoolExpr, AbsExpr, ApExpr, IfExpr, LetExpr),
 	dummyIExpr, dummyOpExpr, dummyNumExpr,
 	dummyBoolExpr, dummyAbsExpr, ifExpr, letExpr, ap) where
 
@@ -17,6 +19,14 @@ data Expr
 	| IfExpr Expr Expr Expr
 	| LetExpr Expr Expr Expr
 	deriving (Eq, Show)
+
+position :: Expr -> SourcePos
+position (IExpr tok) = pos tok
+position (OpExpr tok) = pos tok
+position (NumExpr tok) = pos tok
+position (BoolExpr tok) = pos tok
+position (AbsExpr ident e) = position ident
+position (ApExpr t1 t2) = position t1
 
 dummyIExpr :: String -> Expr
 dummyIExpr name = IExpr (dummyPosTok (I name))
