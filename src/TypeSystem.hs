@@ -2,6 +2,8 @@ module TypeSystem(
 	unify, doSub,
 	Type(TV, INT, BOOL, Func)) where
 
+import Data.List
+
 data Type
 	= TV String
 	| INT
@@ -29,17 +31,11 @@ doSubList :: Sub -> [(Type, Type)] -> [(Type, Type)]
 doSubList s pairs = map (\(x, y) -> (doSub s x, doSub s y)) pairs
 
 doSub :: Sub -> Type -> Type
-doSub [] t = t
-doSub (s:rest) t = if (fst s) == t
-	then doSub rest (snd s)
-	else doSub rest t
-{-doSub s f@(Func t1 t2) = case lookup f s of
-	Just t -> t
-	Nothing -> (Func (doSub s t1) (doSub s t2))
-doSub s tv@(TV _) = case lookup tv s of
-	Just t -> t
-	Nothing -> tv
-doSub _ t = t-}
+doSub s t@(TV _) = case lookup t s of
+	Just subsT -> doSub (delete (t, subsT) s) subsT
+	Nothing -> t
+doSub s t@(Func t1 t2) = Func (doSub s t1) (doSub s t2)
+doSub s t = t
 
 nextSub :: (Type, Type) -> Sub
 nextSub (TV n, t) = if not (elem (TV n) (var t))

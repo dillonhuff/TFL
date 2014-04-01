@@ -59,7 +59,7 @@ typeOfExpr exprStr = case parseExpr exprStr of
 	Right parsedExpr -> Right $ typeOf parsedExpr
 
 typeOf :: Expr -> Type
-typeOf expr = snd $ last sub
+typeOf expr = doSub sub (TV "t0")
 	where
 		constraints = typeConstraints expr
 		sub = unify constraints
@@ -81,6 +81,12 @@ tc e@(AbsExpr ident expr) tvName vars = (tc expr (tvName ++ "1") (newVar:vars)) 
 tc e@(IExpr _) typeVarName vars = case lookup e vars of
 	Just t -> [(TV typeVarName, t)]
 	Nothing -> error "Not a closed term"
+tc e@(ApExpr e1 e2) tvName vars = [apConstr] ++ e2Constrs ++ (tc e1 (tvName ++ "0") vars)
+	where
+		t1Var = TV (tvName ++ "0")
+		t2Var = TV (tvName ++ "1")
+		e2Constrs = tc e2 (tvName ++ "1") vars
+		apConstr = (t1Var, Func t2Var (TV tvName))
 
 parseExpr :: String -> ThrowsError Expr
 parseExpr programText = case lexer programText of
