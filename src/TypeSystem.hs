@@ -1,49 +1,20 @@
-module TypeSystem(
-	inferType,
-	TypeScheme(T, C),
-	Type(INT, BOOL, TypeVar, Func)) where
-
-import ErrorHandling
-import Lexer
-import Parser
-
-data TypeScheme
-	= T Type
-	| C Type Type
-	deriving (Eq, Show)
+module TypeSystem() where
 
 data Type
-	= INT
+	= TV String
+	| INT
 	| BOOL
-	| TypeVar String
 	| Func Type Type
-	deriving (Eq)
-
-instance Show Type where
-	show = showType
-
-showType :: Type -> String
-showType INT = "Int"
-showType BOOL = "Bool"
-showType (TypeVar name) = name
-showType (Func t1 t2) = "(" ++ show t1 ++ " -> " ++ show t2 ++ ")"
+	deriving (Eq, Show)
 
 type Sub = [(Type, Type)]
 
-inferType :: [(Expr, Type)] -> String -> ThrowsError (Sub, TypeScheme)
-inferType context exprStr = case parseExpr exprStr of
-	Left err -> Left err
-	Right expr -> infType context expr
-
-infType :: [(Expr, Type)] -> Expr -> ThrowsError (Sub, TypeScheme)
-infType _ (NumExpr _) = Right ([], T INT)
-infType _ (BoolExpr _) = Right ([], T BOOL)
-infType context ident@(IExpr _) = lookupType context ident
-infType context op@(OpExpr _) = lookupType context op
-infType context abstr@(AbsExpr _ _) = Right ([], T BOOL)
-
-lookupType :: [(Expr, Type)] -> Expr -> ThrowsError (Sub, TypeScheme)
-lookupType context e = case lookup e context of
-	Just t -> Right ([], T t)
-	Nothing -> Left $ TypeErr $ "Error " ++ show (position e) ++ "no type in context for " ++ show e
+doSub :: Sub -> Type -> Type
+doSub s f@(Func t1 t2) = case lookup f s of
+	Just t -> t
+	Nothing -> (Func (doSub s t1) (doSub s t2))
+doSub s tv@(TV String) = case lookup tv s of
+	Just t -> t
+	Nothing -> tv
+doSub _ t = t
 
