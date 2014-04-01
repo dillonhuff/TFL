@@ -1,13 +1,14 @@
 module Parser(
 	position,
 	parseExpr,
-	Expr(IExpr, OpExpr, NumExpr, BoolExpr, AbsExpr, ApExpr, IfExpr, LetExpr),
+	typeOfExpr,
 	dummyIExpr, dummyOpExpr, dummyNumExpr,
 	dummyBoolExpr, dummyAbsExpr, ifExpr, letExpr, ap) where
 
 import ErrorHandling
 import Lexer
 import Text.Parsec
+import TypeSystem
 
 data Expr
 	= IExpr PosTok
@@ -51,6 +52,35 @@ letExpr ident sub e = LetExpr ident sub e
 
 ap :: Expr -> Expr -> Expr
 ap t1 t2 = ApExpr t1 t2
+
+typeOfExpr :: String -> ThrowsError Type
+typeOfExpr exprStr = case parseExpr exprStr of
+	Left err -> Left err
+	Right parsedExpr -> Right $ typeOf parsedExpr
+
+typeOf :: Expr -> Type
+typeOf expr = snd $ last sub
+	where
+		constraints = typeConstraints expr
+		sub = unify constraints
+
+typeConstraints :: Expr -> [(Type, Type)]
+typeConstraints expr = tc expr "t0" []
+
+tc :: Expr -> String -> [(Expr, Type)] -> [(Type, Type)]
+tc e@(NumExpr _) typeVarName vars = [(TV typeVarName, INT)]
+tc e@(BoolExpr _) typeVarName vars = [(TV typeVarName, BOOL)]
+tc e@(AbsExpr ident expr) tvName vars = (tc expr (tvName ++ "1") (newVar:vars)) ++ [absConstr, varConstr]
+	where
+		termVar = TV (tvName ++ "1")
+		idVar = TV (tvName ++ "0")
+		varName = TV ("v" ++ tvName)
+		newVar = (ident, varName)
+		varConstr = (idVar, varName)
+		absConstr = (TV tvName, Func idVar termVar)
+tc e@(IExpr _) typeVarName vars = case lookup e vars of
+	Just t -> [(TV typeVarName, t)]
+	Nothing -> error "Not a closed term"
 
 parseExpr :: String -> ThrowsError Expr
 parseExpr programText = case lexer programText of

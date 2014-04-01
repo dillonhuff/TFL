@@ -4,6 +4,7 @@ module ParserTests(
 import ErrorHandling
 import Parser
 import Test.HUnit
+import TypeSystem
 
 allParserTests = runTestTT tests
 
@@ -18,7 +19,11 @@ tests = TestList
 	,parseExpr_apExpr
 	,parseExpr_multiApExpr
 	,parseExpr_ifExpr
-	,parseExpr_letExpr]
+	,parseExpr_letExpr
+	,typeOfExpr_Num
+	,typeOfExpr_True
+	,typeOfExpr_False
+	,typeOfExpr_Abs]
 
 parseExpr_IExpr =
 	parseExprTest "n12" (dummyIExpr "n12")
@@ -69,3 +74,16 @@ parseExprTest input expected = TestCase
 	(assertEqual ("Input: " ++ show input)
 		expected
 		(extractValue $ parseExpr input))
+
+typeOfExpr_Num = exprTypeTest "5483" INT
+
+typeOfExpr_True = exprTypeTest "True" BOOL
+
+typeOfExpr_False = exprTypeTest "False" BOOL
+
+typeOfExpr_Abs = exprTypeTest "\\x . x" (Func (TV "t0") (TV "t0"))
+
+exprTypeTest input expected = TestCase
+	(assertEqual ("Input: " ++ show input)
+		expected
+		(extractValue $ typeOfExpr input))
