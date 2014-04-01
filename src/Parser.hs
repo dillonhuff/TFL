@@ -87,6 +87,23 @@ tc e@(ApExpr e1 e2) tvName vars = [apConstr] ++ e2Constrs ++ (tc e1 (tvName ++ "
 		t2Var = TV (tvName ++ "1")
 		e2Constrs = tc e2 (tvName ++ "1") vars
 		apConstr = (t1Var, Func t2Var (TV tvName))
+tc e@(IfExpr cond e1 e2) tvName vars = newConstrs ++ condTc ++ e1Tc ++ e2Tc
+	where
+		exprVar = TV tvName
+		condVar = TV (tvName ++ "0")
+		e1Var = TV (tvName ++ "1")
+		e2Var = TV (tvName ++ "2")
+		newConstrs = [(condVar, BOOL), (exprVar, e1Var), (exprVar, e2Var)]
+		condTc = tc cond (tvName ++ "0") vars
+		e1Tc = tc e1 (tvName ++ "1") vars
+		e2Tc = tc e2 (tvName ++ "2") vars
+tc e@(LetExpr var e1 e2) tvName vars = newConstrs ++ (tc e2 (tvName ++ "2") (newVar:vars))
+	where
+		vart = TV (tvName ++ "0")
+		e1Var = TV (tvName ++ "1")
+		e2Var = TV (tvName ++ "2")
+		newVar = (var, vart)
+		newConstrs = ((TV tvName, e2Var):(vart, e1Var):(tc e1 (tvName ++ "1") vars))
 
 parseExpr :: String -> ThrowsError Expr
 parseExpr programText = case lexer programText of

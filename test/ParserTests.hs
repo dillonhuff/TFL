@@ -24,7 +24,10 @@ tests = TestList
 	,typeOfExpr_True
 	,typeOfExpr_False
 	,typeOfExpr_Abs
-	,typeOfExpr_NumAp]
+	,typeOfExpr_NumAp
+	,typeOfExpr_IfExpr
+	,typeOfExpr_ComplexIf
+	,typeOfExpr_LetExpr]
 
 parseExpr_IExpr =
 	parseExprTest "n12" (dummyIExpr "n12")
@@ -85,6 +88,12 @@ typeOfExpr_False = exprTypeTest "False" BOOL
 typeOfExpr_Abs = exprTypeTest "\\x . x" (Func (TV "vt0") (TV "vt0"))
 
 typeOfExpr_NumAp = exprTypeTest "(\\y . y) 3" INT
+
+typeOfExpr_IfExpr = exprTypeTest "if True then 12 else 98" INT
+
+typeOfExpr_ComplexIf = exprTypeTest "if True then (\\x . x) 4 else 123" INT
+
+typeOfExpr_LetExpr = exprTypeTest "let x = True in x" BOOL
 
 exprTypeTest input expected = TestCase
 	(assertEqual ("Input: " ++ show input)
