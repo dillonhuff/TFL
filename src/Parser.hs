@@ -1,4 +1,5 @@
 module Parser(
+	Expr,
 	position,
 	parseExpr,
 	typeOfExpr,
