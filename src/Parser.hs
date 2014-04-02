@@ -64,12 +64,29 @@ typeOf expr = doSub sub (TV "t0")
 		constraints = typeConstraints expr
 		sub = unify constraints
 
+predefinedVars =
+	[(dummyOpExpr "+", Func INT (Func INT INT))
+	,(dummyOpExpr "*", Func INT (Func INT INT))
+	,(dummyOpExpr "/", Func INT (Func INT INT))
+	,(dummyOpExpr "-", Func INT INT)
+	,(dummyOpExpr "==", Func INT (Func INT BOOL))
+	,(dummyOpExpr "<=", Func INT (Func INT BOOL))
+	,(dummyOpExpr ">=", Func INT (Func INT BOOL))
+	,(dummyOpExpr "<", Func INT (Func INT BOOL))
+	,(dummyOpExpr ">", Func INT (Func INT BOOL))
+	,(dummyOpExpr "~", Func BOOL BOOL)
+	,(dummyOpExpr "&&", Func BOOL (Func BOOL BOOL))
+	,(dummyOpExpr "||", Func BOOL (Func BOOL BOOL))]
+
 typeConstraints :: Expr -> [(Type, Type)]
-typeConstraints expr = tc expr "t0" []
+typeConstraints expr = tc expr "t0" predefinedVars
 
 tc :: Expr -> String -> [(Expr, Type)] -> [(Type, Type)]
 tc e@(NumExpr _) typeVarName vars = [(TV typeVarName, INT)]
 tc e@(BoolExpr _) typeVarName vars = [(TV typeVarName, BOOL)]
+tc e@(OpExpr _) typeVarName vars = case lookup e vars of
+	Just t -> [(TV typeVarName, t)]
+	Nothing -> error $ show e ++ " is not a valid operator"
 tc e@(AbsExpr ident expr) tvName vars = (tc expr (tvName ++ "1") (newVar:vars)) ++ [absConstr, varConstr]
 	where
 		termVar = TV (tvName ++ "1")
@@ -93,7 +110,7 @@ tc e@(IfExpr cond e1 e2) tvName vars = newConstrs ++ condTc ++ e1Tc ++ e2Tc
 		condVar = TV (tvName ++ "0")
 		e1Var = TV (tvName ++ "1")
 		e2Var = TV (tvName ++ "2")
-		newConstrs = [(condVar, BOOL), (exprVar, e1Var), (exprVar, e2Var)]
+		newConstrs = [(condVar, BOOL), (exprVar, e1Var), (e1Var, e2Var)]
 		condTc = tc cond (tvName ++ "0") vars
 		e1Tc = tc e1 (tvName ++ "1") vars
 		e2Tc = tc e2 (tvName ++ "2") vars

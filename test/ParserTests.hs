@@ -27,7 +27,20 @@ tests = TestList
 	,typeOfExpr_NumAp
 	,typeOfExpr_IfExpr
 	,typeOfExpr_ComplexIf
-	,typeOfExpr_LetExpr]
+	,typeOfExpr_LetExpr
+	,typeOfExpr_PlusExpr
+	,typeOfExpr_TimesExpr
+	,typeOfExpr_DivideExpr
+	,typeOfExpr_MinusExpr
+	,typeOfExpr_EqExpr
+	,typeOfExpr_LTEExpr
+	,typeOfExpr_GTEExpr
+	,typeOfExpr_LTExpr
+	,typeOfExpr_GTExpr
+	,typeOfExpr_NotExpr
+	,typeOfExpr_AndExpr
+	,typeOfExpr_OrExpr
+	,typeOfExpr_IfComp]
 
 parseExpr_IExpr =
 	parseExprTest "n12" (dummyIExpr "n12")
@@ -94,6 +107,33 @@ typeOfExpr_IfExpr = exprTypeTest "if True then 12 else 98" INT
 typeOfExpr_ComplexIf = exprTypeTest "if True then (\\x . x) 4 else 123" INT
 
 typeOfExpr_LetExpr = exprTypeTest "let x = True in x" BOOL
+
+typeOfExpr_PlusExpr = exprTypeTest "+" (Func INT (Func INT INT))
+
+typeOfExpr_TimesExpr = exprTypeTest "*" (Func INT (Func INT INT))
+
+typeOfExpr_DivideExpr = exprTypeTest "/" (Func INT (Func INT INT))
+
+typeOfExpr_MinusExpr = exprTypeTest "-" (Func INT INT)
+
+typeOfExpr_EqExpr = exprTypeTest "==" (Func INT (Func INT BOOL))
+
+typeOfExpr_LTEExpr = exprTypeTest "<=" (Func INT (Func INT BOOL))
+
+typeOfExpr_GTEExpr = exprTypeTest ">=" (Func INT (Func INT BOOL))
+
+typeOfExpr_LTExpr = exprTypeTest "<" (Func INT (Func INT BOOL))
+
+typeOfExpr_GTExpr = exprTypeTest ">" (Func INT (Func INT BOOL))
+
+typeOfExpr_NotExpr = exprTypeTest "~" (Func BOOL BOOL)
+
+typeOfExpr_AndExpr = exprTypeTest "&&" (Func BOOL (Func BOOL BOOL))
+
+typeOfExpr_OrExpr = exprTypeTest "||" (Func BOOL (Func BOOL BOOL))
+
+typeOfExpr_IfComp =
+	exprTypeTest "if 12 <= 2 then && True (|| False True) else True" BOOL
 
 exprTypeTest input expected = TestCase
 	(assertEqual ("Input: " ++ show input)
