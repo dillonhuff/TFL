@@ -19,6 +19,10 @@ showType INT = "Int"
 showType BOOL = "Bool"
 showType (Func t1 t2) = "(" ++ show t1 ++ " -> " ++ show t2 ++ ")"
 
+typeVar :: Type -> Bool
+typeVar (TV _) = True
+typeVar _ = False
+
 type Sub = [(Type, Type)]
 
 unify :: [(Type, Type)] -> Sub
@@ -47,7 +51,9 @@ nextTerms :: (Type, Type) -> [(Type, Type)]
 nextTerms (Func t1 t2, Func t3 t4) = [(t1, t3), (t2, t4)]
 nextTerms (TV n1, TV n2) = []
 nextTerms (s, TV n) = [(TV n, s)] -- Reversal
-nextTerms _ = []
+nextTerms (s, t) = if (not $ typeVar s) && (not $ typeVar t)
+	then error $ "Cannot substitute type " ++ show t ++ " for type " ++ show s
+	else []
 
 var :: Type -> [Type]
 var t@(TV _) = [t]

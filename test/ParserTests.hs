@@ -133,7 +133,7 @@ typeOfExpr_AndExpr = exprTypeTest "&&" (Func BOOL (Func BOOL BOOL))
 typeOfExpr_OrExpr = exprTypeTest "||" (Func BOOL (Func BOOL BOOL))
 
 typeOfExpr_IfComp =
-	exprTypeTest "if 12 <= 2 then && True (|| False True) else True" BOOL
+	exprTypeTest "if <= 12 2 then && True (|| False True) else True" BOOL
 
 exprTypeTest input expected = TestCase
 	(assertEqual ("Input: " ++ show input)
