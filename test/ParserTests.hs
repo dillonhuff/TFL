@@ -40,7 +40,8 @@ tests = TestList
 	,typeOfExpr_NotExpr
 	,typeOfExpr_AndExpr
 	,typeOfExpr_OrExpr
-	,typeOfExpr_IfComp]
+	,typeOfExpr_IfComp
+	,typeOfExpr_ArithAndBool]
 
 parseExpr_IExpr =
 	parseExprTest "n12" (dummyIExpr "n12")
@@ -134,6 +135,9 @@ typeOfExpr_OrExpr = exprTypeTest "||" (Func BOOL (Func BOOL BOOL))
 
 typeOfExpr_IfComp =
 	exprTypeTest "if <= 12 2 then && True (|| False True) else True" BOOL
+
+typeOfExpr_ArithAndBool =
+	exprTypeTest "<= (+ (* 2 3) (- 2)) (- (/ 2 (+ 2 3)))" BOOL
 
 exprTypeTest input expected = TestCase
 	(assertEqual ("Input: " ++ show input)

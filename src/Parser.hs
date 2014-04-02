@@ -64,7 +64,7 @@ typeOf expr = doSub sub (TV "t0")
 		constraints = typeConstraints expr
 		sub = unify constraints
 
-predefinedVars =
+predefinedOps =
 	[(dummyOpExpr "+", Func INT (Func INT INT))
 	,(dummyOpExpr "*", Func INT (Func INT INT))
 	,(dummyOpExpr "/", Func INT (Func INT INT))
@@ -79,7 +79,7 @@ predefinedVars =
 	,(dummyOpExpr "||", Func BOOL (Func BOOL BOOL))]
 
 typeConstraints :: Expr -> [(Type, Type)]
-typeConstraints expr = tc expr "t0" predefinedVars
+typeConstraints expr = tc expr "t0" predefinedOps
 
 tc :: Expr -> String -> [(Expr, Type)] -> [(Type, Type)]
 tc e@(NumExpr _) typeVarName vars = [(TV typeVarName, INT)]
