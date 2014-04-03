@@ -12,6 +12,9 @@ tests = TestList
 	[evalExpr_Num
 	,evalExpr_Bool
 	,evalExpr_Abs
+	,evalExpr_AbsSub
+	,evalExpr_BoolAbs
+	,evalExpr_ArithAbs
 	,evalExpr_MinusNum
 	,evalExpr_PlusNum
 	,evalExpr_TimesNum
@@ -24,13 +27,27 @@ tests = TestList
 	,evalExpr_LTE
 	,evalExpr_GTE
 	,evalExpr_LT
-	,evalExpr_GT]
+	,evalExpr_GT
+	,evalExpr_Complicated
+	,evalExpr_SimpleIf
+	,evalExpr_ComplicatedIf
+	,evalExpr_SimpleLet
+	,evalExpr_LetBoolOp
+	,evalExpr_LetIf
+	,evalExpr_LetAbs
+	,evalExpr_LetAbsNotSameVar]
 
 evalExpr_Num = testStackEval "3" (dummyNumExpr 3)
 
 evalExpr_Bool = testStackEval "True" (dummyBoolExpr True)
 
 evalExpr_Abs = testStackEval "\\x. x" (dummyAbsExpr "x" (dummyIExpr "x"))
+
+evalExpr_AbsSub = testStackEval "(\\k . k) 2" (dummyNumExpr 2)
+
+evalExpr_BoolAbs = testStackEval "(\\x. (|| x x)) True" (dummyBoolExpr True)
+
+evalExpr_ArithAbs = testStackEval "(\\x . (\\y . (+ x y))) 2" (dummyNumExpr 5)
 
 evalExpr_MinusNum = testStackEval "- 3" (dummyNumExpr (-3))
 
@@ -66,6 +83,37 @@ evalExpr_GT =
 
 evalExpr_LT =
 	testStackEval "< 34908 176" (dummyBoolExpr False)
+
+evalExpr_Complicated =
+	testStackEval
+		"|| (== (+ (- (- 1)) (* 2 12)) (- 12)) (~ (<= (+ 2 3) (* 3 (-2))))"
+		(dummyBoolExpr True)
+
+evalExpr_SimpleIf =
+	testStackEval "if True then 9 else 2"
+	(dummyNumExpr 9)
+
+evalExpr_ComplicatedIf =
+	testStackEval
+		"if ~(~(|| (>= 2 (-(* 2 (-9))) False))) then 2 else + (-(+ (-2) (/ 6 (*2 3)))) (* 2 3)"
+		(dummyNumExpr 7)
+
+evalExpr_SimpleLet =
+	testStackEval "let k = 3 in k" (dummyNumExpr 3)
+
+evalExpr_LetBoolOp =
+	testStackEval "let x = True in (&& True x)" (dummyBoolExpr True)
+
+evalExpr_LetIf =
+	testStackEval
+		"let u = (- 12) in if (<= 3 u) then (+ 2 5) else (+ (-9) u)"
+		(dummyNumExpr (-21))
+
+evalExpr_LetAbs =
+	testStackEval "let t = 3 in (\\t . (* t t))" (dummyNumExpr 9)
+
+evalExpr_LetAbsNotSameVar =
+	testStackEval "let y = 3 in (\\t . y)" (dummyAbsExpr "t" (dummyNumExpr 3))
 
 testStackEval input expected = TestCase
 	(assertEqual ("Input: " ++ show input)

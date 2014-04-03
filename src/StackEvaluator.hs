@@ -22,6 +22,9 @@ base (SM stk _ _ _) = snd $ last stk
 pop :: StackM -> StackM
 pop (SM stk d h g) = SM (tail stk) ((head d - 1):(tail d)) h g
 
+curDepth :: StackM -> Int
+curDepth (SM _ d h g) = head d
+
 popDump :: StackM -> StackM
 popDump (SM stk d h g) = SM stk (tail d) h g
 
@@ -36,9 +39,32 @@ evalExpr e = base $ eval newStackM e
 
 eval :: StackM -> Expr -> StackM
 eval sm e = case e of
+	(IfExpr _ _ _) -> doIf e sm
+	(LetExpr _ _ _) -> doLet e sm
 	(ApExpr e1 _) -> eval (push e sm) e1
+	(AbsExpr var e1) -> doAbs e sm
 	(OpExpr _) -> doOp e sm
 	_ -> popDump $ push e sm
+
+doIf :: Expr -> StackM -> StackM
+doIf (IfExpr cond e1 e2) sm = if boolVal $ evalExpr cond
+	then eval sm e1
+	else eval sm e2
+
+doLet :: Expr -> StackM -> StackM
+doLet (LetExpr var e1 e2) sm = eval sm (sub e1 var e2)
+
+doAbs :: Expr -> StackM -> StackM
+doAbs e sm = if curDepth sm >= 1
+	then evalAbs e sm
+	else push e sm
+
+evalAbs :: Expr -> StackM -> StackM
+evalAbs (AbsExpr var e) sm = newStack
+	where
+		smArgEvaled = evalArg sm
+		arg = top smArgEvaled
+		newStack = eval (pop smArgEvaled) (sub arg var e)
 
 doOp :: Expr -> StackM -> StackM
 doOp e sm = case lookup e (globals sm) of

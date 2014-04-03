@@ -1,6 +1,6 @@
 module Parser(
 	Expr(IExpr, OpExpr, NumExpr, BoolExpr, AbsExpr, ApExpr, IfExpr, LetExpr),
-	arg1, arg2, numVal, boolVal,
+	arg1, arg2, numVal, boolVal, sub,
 	position,
 	parseExpr,
 	typeOfExpr,
@@ -22,6 +22,20 @@ data Expr
 	| IfExpr Expr Expr Expr
 	| LetExpr Expr Expr Expr
 	deriving (Eq, Show)
+
+sub :: Expr -> Expr -> Expr -> Expr
+sub toSub var (ApExpr e1 e2) = ApExpr (sub toSub var e1) (sub toSub var e2)
+sub toSub var (AbsExpr v e) = if var == v
+	then sub toSub var e
+	else (AbsExpr v (sub toSub var e))
+sub toSub var (IfExpr cond e1 e2) =
+	IfExpr (sub toSub var cond)
+		(sub toSub var e1)
+		(sub toSub var e2)
+sub toSub var e = if var == e
+	then toSub
+	else e
+
 
 position :: Expr -> SourcePos
 position (IExpr tok) = pos tok
