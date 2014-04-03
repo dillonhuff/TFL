@@ -46,7 +46,21 @@ doOp e sm = case lookup e (globals sm) of
 	Nothing -> error (show e ++ " is not a defined operator")
 
 -- Functions for evaluating builtin operators
-builtinOps = [(dummyOpExpr "-", minusOp)]
+builtinOps =
+	[(dummyOpExpr "-", minusOp)
+	,(dummyOpExpr "+", binaryOp plus)
+	,(dummyOpExpr "*", binaryOp times)
+	,(dummyOpExpr "/", binaryOp divide)]
+
+binaryOp :: (Expr -> Expr -> Expr) -> StackM -> StackM
+binaryOp op sm = newStack
+	where
+		smArg1Evaled = evalArg sm
+		arg1 = top smArg1Evaled
+		smArg2Evaled = evalArg $ pop smArg1Evaled
+		arg2 = top smArg2Evaled
+		opRes = op arg1 arg2
+		newStack = push opRes $ pop smArg2Evaled
 
 minusOp :: StackM -> StackM
 minusOp sm = newStack
@@ -65,5 +79,11 @@ evalArg sm = finalSM
 negative :: Expr -> Expr
 negative e = dummyNumExpr ((-1) * numVal e)
 
-sum :: Expr -> Expr -> Expr
-sum e1 e2 = dummyNumExpr (numVal e1 + numVal e2)
+plus :: Expr -> Expr -> Expr
+plus e1 e2 = dummyNumExpr (numVal e1 + numVal e2)
+
+times :: Expr -> Expr -> Expr
+times e1 e2 = dummyNumExpr (numVal e1 * numVal e2)
+
+divide :: Expr -> Expr -> Expr
+divide e1 e2 = dummyNumExpr (div (numVal e1) (numVal e2))
