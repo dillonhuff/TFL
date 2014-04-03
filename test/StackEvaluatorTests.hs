@@ -20,7 +20,7 @@ evalExpr_Bool = testStackEval "True" (dummyBoolExpr True)
 
 evalExpr_Abs = testStackEval "\\x. x" (dummyAbsExpr "x" (dummyIExpr "x"))
 
-evalExpr_AbsNum = testStackEval "(\\x . x) 3" (dummyNumExpr 3)
+evalExpr_AbsNum = testStackEval "- 3" (dummyNumExpr (-3))
 
 testStackEval input expected = TestCase
 	(assertEqual ("Input: " ++ show input)

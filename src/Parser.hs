@@ -1,5 +1,6 @@
 module Parser(
-	Expr,
+	Expr(IExpr, OpExpr, NumExpr, BoolExpr, AbsExpr, ApExpr, IfExpr, LetExpr),
+	arg1, arg2, numVal, boolVal,
 	position,
 	parseExpr,
 	typeOfExpr,
@@ -29,6 +30,22 @@ position (NumExpr tok) = pos tok
 position (BoolExpr tok) = pos tok
 position (AbsExpr ident e) = position ident
 position (ApExpr t1 t2) = position t1
+
+numVal :: Expr -> Int
+numVal (NumExpr postok) = num $ tok $ postok
+numVal e = error $ show e ++ " is not a number"
+
+boolVal :: Expr -> Bool
+boolVal (BoolExpr postok) = bool $ tok $ postok
+boolVal e = error $ show e ++ " is not a boolean"
+
+arg1 :: Expr -> Expr
+arg1 (ApExpr e1 _) = e1
+arg1 e = error $ show e ++ " is not an application"
+
+arg2 :: Expr -> Expr
+arg2 (ApExpr _ e2) = e2
+arg2 e = error $ show e ++ " is not an application"
 
 dummyIExpr :: String -> Expr
 dummyIExpr name = IExpr (dummyPosTok (I name))

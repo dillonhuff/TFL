@@ -1,5 +1,6 @@
 module Lexer(
 	PosTok(PT), tok, pos, dummyPosTok,
+	num, bool,
 	lexer,
 	Tok(I, Num, Op, Boolean, LET, EQUAL, IN, IF, THEN, ELSE, LPAREN, RPAREN, LAMBDA, DOT),
 	isOpTok, isNumTok, isIdTok, isBoolTok) where
@@ -46,6 +47,12 @@ data Tok
 	| LAMBDA
 	| DOT
 	deriving (Eq, Show)
+
+num (Num n) = n
+num t = error $ show t ++ " is not a number"
+
+bool (Boolean b) = b
+bool t = error $ show t ++ " is not a boolean"
 
 isOpTok (Op _) = True
 isOpTok _ = False
