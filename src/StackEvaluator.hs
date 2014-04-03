@@ -53,7 +53,12 @@ builtinOps =
 	,(dummyOpExpr "/", binaryOp divide)
 	,(dummyOpExpr "~", unaryOp boolNot)
 	,(dummyOpExpr "&&", binaryOp boolAnd)
-	,(dummyOpExpr "||", binaryOp boolOr)]
+	,(dummyOpExpr "||", binaryOp boolOr)
+	,(dummyOpExpr "==", binaryOp eq)
+	,(dummyOpExpr "<=", binaryOp lte)
+	,(dummyOpExpr ">=", binaryOp gte)
+	,(dummyOpExpr "<", binaryOp lt)
+	,(dummyOpExpr ">", binaryOp gt)]
 
 binaryOp :: (Expr -> Expr -> Expr) -> StackM -> StackM
 binaryOp op sm = newStack
@@ -109,3 +114,19 @@ boolAnd e1 e2 = dummyBoolExpr (boolVal e1 && boolVal e2)
 
 boolOr :: Expr -> Expr -> Expr
 boolOr e1 e2 = dummyBoolExpr (boolVal e1 || boolVal e2)
+
+-- Comparison operators
+eq :: Expr -> Expr -> Expr
+eq e1 e2 = dummyBoolExpr (numVal e1 == numVal e2)
+
+lte :: Expr -> Expr -> Expr
+lte e1 e2 = dummyBoolExpr (numVal e1 <= numVal e2)
+
+gte :: Expr -> Expr -> Expr
+gte e1 e2 = dummyBoolExpr (numVal e1 >= numVal e2)
+
+gt :: Expr -> Expr -> Expr
+gt e1 e2 = dummyBoolExpr (numVal e1 > numVal e2)
+
+lt :: Expr -> Expr -> Expr
+lt e1 e2 = dummyBoolExpr (numVal e1 < numVal e2)

@@ -19,7 +19,12 @@ tests = TestList
 	,evalExpr_ArithExpr
 	,evalExpr_NotExpr
 	,evalExpr_AndExpr
-	,evalExpr_OrExpr]
+	,evalExpr_OrExpr
+	,evalExpr_EQ
+	,evalExpr_LTE
+	,evalExpr_GTE
+	,evalExpr_LT
+	,evalExpr_GT]
 
 evalExpr_Num = testStackEval "3" (dummyNumExpr 3)
 
@@ -46,6 +51,21 @@ evalExpr_AndExpr =
 
 evalExpr_OrExpr =
 	testStackEval "|| False True" (dummyBoolExpr True)
+
+evalExpr_EQ =
+	testStackEval "== 34 12" (dummyBoolExpr False)
+
+evalExpr_GTE =
+	testStackEval ">= (-78) (-123)" (dummyBoolExpr True)
+
+evalExpr_LTE =
+	testStackEval "<= 9 14" (dummyBoolExpr True)
+
+evalExpr_GT =
+	testStackEval "> 4 12" (dummyBoolExpr False)
+
+evalExpr_LT =
+	testStackEval "< 34908 176" (dummyBoolExpr False)
 
 testStackEval input expected = TestCase
 	(assertEqual ("Input: " ++ show input)
