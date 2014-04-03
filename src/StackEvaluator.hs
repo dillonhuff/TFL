@@ -51,11 +51,19 @@ builtinOps = [(dummyOpExpr "-", minusOp)]
 minusOp :: StackM -> StackM
 minusOp sm = newStack
 	where
+		smWithArgEvaled = evalArg sm
+		negNum = negative $ top $ smWithArgEvaled
+		newStack = push negNum $ pop smWithArgEvaled
+
+evalArg :: StackM -> StackM
+evalArg sm = finalSM
+	where
 		arg = arg2 $ top sm
-		newSm = pop sm
-		smWithArgEvaled = eval newSm arg
-		resultNum = top smWithArgEvaled
-		newStack = push (negative resultNum) $ pop smWithArgEvaled
+		smWithNewDump = pushDump $ pop sm
+		finalSM = popDump $ eval smWithNewDump arg
 
 negative :: Expr -> Expr
 negative e = dummyNumExpr ((-1) * numVal e)
+
+sum :: Expr -> Expr -> Expr
+sum e1 e2 = dummyNumExpr (numVal e1 + numVal e2)
