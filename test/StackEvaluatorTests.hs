@@ -16,7 +16,10 @@ tests = TestList
 	,evalExpr_PlusNum
 	,evalExpr_TimesNum
 	,evalExpr_DivNum
-	,evalExpr_ArithExpr]
+	,evalExpr_ArithExpr
+	,evalExpr_NotExpr
+	,evalExpr_AndExpr
+	,evalExpr_OrExpr]
 
 evalExpr_Num = testStackEval "3" (dummyNumExpr 3)
 
@@ -34,6 +37,15 @@ evalExpr_DivNum = testStackEval "/ 17 3" (dummyNumExpr 5)
 
 evalExpr_ArithExpr =
 	testStackEval "* 4 (+ (- 3) 7))" (dummyNumExpr 16)
+
+evalExpr_NotExpr =
+	testStackEval "~True" (dummyBoolExpr False)
+
+evalExpr_AndExpr =
+	testStackEval "&& True False" (dummyBoolExpr False)
+
+evalExpr_OrExpr =
+	testStackEval "|| False True" (dummyBoolExpr True)
 
 testStackEval input expected = TestCase
 	(assertEqual ("Input: " ++ show input)

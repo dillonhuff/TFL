@@ -47,10 +47,13 @@ doOp e sm = case lookup e (globals sm) of
 
 -- Functions for evaluating builtin operators
 builtinOps =
-	[(dummyOpExpr "-", minusOp)
+	[(dummyOpExpr "-", unaryOp negative)
 	,(dummyOpExpr "+", binaryOp plus)
 	,(dummyOpExpr "*", binaryOp times)
-	,(dummyOpExpr "/", binaryOp divide)]
+	,(dummyOpExpr "/", binaryOp divide)
+	,(dummyOpExpr "~", unaryOp boolNot)
+	,(dummyOpExpr "&&", binaryOp boolAnd)
+	,(dummyOpExpr "||", binaryOp boolOr)]
 
 binaryOp :: (Expr -> Expr -> Expr) -> StackM -> StackM
 binaryOp op sm = newStack
@@ -61,6 +64,14 @@ binaryOp op sm = newStack
 		arg2 = top smArg2Evaled
 		opRes = op arg1 arg2
 		newStack = push opRes $ pop smArg2Evaled
+
+unaryOp :: (Expr -> Expr) -> StackM -> StackM
+unaryOp op sm = newStack
+	where
+		smArg1Evaled = evalArg sm
+		arg1 = top smArg1Evaled
+		opRes = op arg1
+		newStack = push opRes $ pop smArg1Evaled
 
 minusOp :: StackM -> StackM
 minusOp sm = newStack
@@ -76,6 +87,7 @@ evalArg sm = finalSM
 		smWithNewDump = pushDump $ pop sm
 		finalSM = popDump $ eval smWithNewDump arg
 
+-- Arithmetic operators
 negative :: Expr -> Expr
 negative e = dummyNumExpr ((-1) * numVal e)
 
@@ -87,3 +99,13 @@ times e1 e2 = dummyNumExpr (numVal e1 * numVal e2)
 
 divide :: Expr -> Expr -> Expr
 divide e1 e2 = dummyNumExpr (div (numVal e1) (numVal e2))
+
+-- Boolean operators
+boolNot :: Expr -> Expr
+boolNot e = dummyBoolExpr (not $ boolVal e)
+
+boolAnd :: Expr -> Expr -> Expr
+boolAnd e1 e2 = dummyBoolExpr (boolVal e1 && boolVal e2)
+
+boolOr :: Expr -> Expr -> Expr
+boolOr e1 e2 = dummyBoolExpr (boolVal e1 || boolVal e2)
