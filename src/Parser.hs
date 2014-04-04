@@ -113,7 +113,9 @@ typeOfExpr exprStr = case parseExpr exprStr of
 
 -- TODO: Refactor to be less convoluted
 typeOfProg :: [ExprDef] -> Type
-typeOfProg defs = error $ show subs--doSub subs mainTV
+typeOfProg defs = if length subs /= 0
+	then doSub subs mainTV
+	else error "NOOOO"
 	where
 		newVars = map (\(e, num) -> (fst e, TV ("t" ++ show num))) $ zip defs [0..(length defs - 1)]
 		defExprs = map snd defs
