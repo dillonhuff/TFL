@@ -14,13 +14,21 @@ push :: Expr -> StackM -> StackM
 push e (SM stk d h g) = (SM ((head h, e):stk) ((head d + 1):(tail d)) (tail h) g)
 
 top :: StackM -> Expr
-top (SM stk _ _ _) = snd $ head stk
+top (SM stk _ _ _) = if length stk > 0
+	then snd $ head stk
+	else error $ "TOP: empty stack"
 
 base :: StackM -> Expr
-base (SM stk _ _ _) = snd $ last stk
+base (SM stk _ _ _) = if length stk > 0
+	then snd $ last stk
+	else error $ "BASE: empty stack"
 
 pop :: StackM -> StackM
-pop (SM stk d h g) = SM (tail stk) ((head d - 1):(tail d)) h g
+pop (SM stk d h g) = SM (tail stk) ((head d - 1):(tail d)) h g{-if length d > 0
+	then if length stk > 0
+		then SM (tail stk) ((head d - 1):(tail d)) h g
+		else error "POP: stk empty"
+	else error $ "POP: d empty " ++ " stack is " ++ show stk-}
 
 curDepth :: StackM -> Int
 curDepth (SM _ d h g) = head d
@@ -42,7 +50,7 @@ eval sm e = case e of
 	(IfExpr _ _ _) -> doIf e sm
 	(LetExpr _ _ _) -> doLet e sm
 	(ApExpr e1 _) -> eval (push e sm) e1
-	(AbsExpr var e1) -> doAbs e sm
+	(AbsExpr _ _) -> doAbs e sm
 	(OpExpr _) -> doOp e sm
 	_ -> popDump $ push e sm
 

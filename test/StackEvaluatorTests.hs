@@ -47,7 +47,7 @@ evalExpr_AbsSub = testStackEval "(\\k . k) 2" (dummyNumExpr 2)
 
 evalExpr_BoolAbs = testStackEval "(\\x. (|| x x)) True" (dummyBoolExpr True)
 
-evalExpr_ArithAbs = testStackEval "(\\x . (\\y . (+ x y))) 2" (dummyNumExpr 5)
+evalExpr_ArithAbs = testStackEval "(\\x . (\\y . (+ x y))) 2 3" (dummyNumExpr 5)
 
 evalExpr_MinusNum = testStackEval "- 3" (dummyNumExpr (-3))
 
