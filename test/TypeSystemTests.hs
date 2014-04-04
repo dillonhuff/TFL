@@ -1,4 +1,3 @@
-module TypeSystemTests(
-	allTypeSystemTests) where
+module TypeSystemTests() where
 
 import TypeSystem
