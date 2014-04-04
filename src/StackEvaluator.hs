@@ -1,4 +1,5 @@
 module StackEvaluator(
+	evalProgram,
 	evalExpr) where
 
 import ErrorHandling
@@ -8,45 +9,49 @@ type Addr = Int
 
 type Operation = StackM -> StackM
 
-data StackM = SM {stk :: [(Addr, Expr)], dump :: [Int], heap :: [Addr], globals :: [(Expr, Operation)]}
+data StackM = SM {stk :: [(Addr, Expr)],
+	dump :: [Int],
+	heap :: [Addr],
+	globals :: [(Expr, Operation)],
+	userDefs :: [ExprDef]}
 
 push :: Expr -> StackM -> StackM
-push e (SM stk d h g) = (SM ((head h, e):stk) ((head d + 1):(tail d)) (tail h) g)
+push e (SM stk d h g i) = (SM ((head h, e):stk) ((head d + 1):(tail d)) (tail h) g) i
 
 top :: StackM -> Expr
-top (SM stk _ _ _) = if length stk > 0
+top (SM stk _ _ _ _) = if length stk > 0
 	then snd $ head stk
 	else error $ "TOP: empty stack"
 
 base :: StackM -> Expr
-base (SM stk _ _ _) = if length stk > 0
+base (SM stk _ _ _ _) = if length stk > 0
 	then snd $ last stk
 	else error $ "BASE: empty stack"
 
 pop :: StackM -> StackM
-pop (SM stk d h g) = SM (tail stk) ((head d - 1):(tail d)) h g{-if length d > 0
-	then if length stk > 0
-		then SM (tail stk) ((head d - 1):(tail d)) h g
-		else error "POP: stk empty"
-	else error $ "POP: d empty " ++ " stack is " ++ show stk-}
+pop (SM stk d h g i) = SM (tail stk) ((head d - 1):(tail d)) h g i
 
 curDepth :: StackM -> Int
-curDepth (SM _ d h g) = head d
+curDepth (SM _ d h g i) = head d
 
 incDump :: StackM -> StackM
-incDump (SM stk d h g) = SM stk ((head d + 1):(tail d)) h g
+incDump (SM stk d h g i) = SM stk ((head d + 1):(tail d)) h g i
 
 popDump :: StackM -> StackM
-popDump (SM stk d h g) = SM stk (tail d) h g
+popDump (SM stk d h g i) = SM stk (tail d) h g i
 
 pushDump :: StackM -> StackM
-pushDump (SM stk d h g) = SM stk (0:d) h g
+pushDump (SM stk d h g i) = SM stk (0:d) h g i
 
-newStackM :: StackM
-newStackM = SM {stk = [], dump = [0], heap = [1..], globals = builtinOps}
+newStackM :: [ExprDef] -> StackM
+newStackM ud = SM {stk = [], dump = [0], heap = [1..], globals = builtinOps, userDefs = ud}
+
+evalProgram :: [ExprDef] -> Expr
+evalProgram uDefs = case lookup (dummyIExpr "main") uDefs of
+	Just mainFunc -> base $ eval (newStackM uDefs) mainFunc
 
 evalExpr :: Expr -> Expr
-evalExpr e = base $ eval newStackM e
+evalExpr e = base $ eval (newStackM []) e
 
 eval :: StackM -> Expr -> StackM
 eval sm e = case e of
@@ -55,6 +60,9 @@ eval sm e = case e of
 	(ApExpr e1 _) -> eval (push e sm) e1
 	(AbsExpr _ _) -> doAbs e sm
 	(OpExpr _) -> doOp e sm
+	(IExpr _) -> case lookup e (userDefs sm) of
+		Just def -> eval sm def
+		Nothing -> error $ show e ++ " is not defined"
 	_ -> push e sm
 
 doIf :: Expr -> StackM -> StackM
@@ -71,7 +79,7 @@ doAbs e sm = if (length $ stk sm) >= 1
 	else push e sm
 
 evalAbs :: Expr -> StackM -> StackM
-evalAbs (AbsExpr var e) sm = newStack--error $ "Current stack depth is " ++ (show $ curDepth sm) ++ (show $ stk $ sm) --newStack
+evalAbs (AbsExpr var e) sm = newStack
 	where
 		smArgEvaled = evalArg sm
 		arg = top smArgEvaled

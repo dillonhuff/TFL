@@ -1,4 +1,5 @@
 module Parser(
+	ExprDef,
 	parseExprDefs,
 	exprDef,
 	Expr(IExpr, OpExpr, NumExpr, BoolExpr, AbsExpr, ApExpr, IfExpr, LetExpr),
