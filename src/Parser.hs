@@ -2,7 +2,7 @@ module Parser(
 	ExprDef,
 	parseExprDefs,
 	exprDef,
-	typeOfProg,
+	typeOfProgram,
 	Expr(IExpr, OpExpr, NumExpr, BoolExpr, AbsExpr, ApExpr, IfExpr, LetExpr),
 	arg1, arg2, numVal, boolVal, sub,
 	position,
@@ -111,9 +111,9 @@ typeOfExpr exprStr = case parseExpr exprStr of
 	Left err -> Left err
 	Right parsedExpr -> Right $ typeOf parsedExpr
 
--- TODO: Refactor to be much less convoluted
+-- TODO: Refactor to be less convoluted
 typeOfProg :: [ExprDef] -> Type
-typeOfProg defs = doSub sub mainTV
+typeOfProg defs = error $ show subs--doSub subs mainTV
 	where
 		newVars = map (\(e, num) -> (fst e, TV ("t" ++ show num))) $ zip defs [0..(length defs - 1)]
 		defExprs = map snd defs
@@ -121,7 +121,7 @@ typeOfProg defs = doSub sub mainTV
 		mainTV = case lookup (dummyIExpr "main") newVars of
 			Just mVar -> mVar
 			Nothing -> error "Program has no main function"
-		sub = unify constraints
+		subs = unify constraints
 
 getTypeConstrs :: [(Expr, Type)] -> (Expr, Type) -> [(Type, Type)]
 getTypeConstrs defVars (e, TV name) = typeConstraints defVars name e
