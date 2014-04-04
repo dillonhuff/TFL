@@ -1,4 +1,6 @@
 module Parser(
+	parseExprDefs,
+	exprDef,
 	Expr(IExpr, OpExpr, NumExpr, BoolExpr, AbsExpr, ApExpr, IfExpr, LetExpr),
 	arg1, arg2, numVal, boolVal, sub,
 	position,
@@ -11,6 +13,16 @@ import ErrorHandling
 import Lexer
 import Text.Parsec
 import TypeSystem
+
+-- Used to store expression definitions
+type ExprDef = (Expr, Expr)
+
+exprDef :: [Expr] -> Expr -> ExprDef
+exprDef (i:rest) e = (i, makeExprWithVars rest e)
+
+makeExprWithVars :: [Expr] -> Expr -> Expr
+makeExprWithVars [] e = e
+makeExprWithVars (i:rest) e = AbsExpr i (makeExprWithVars rest e)
 
 data Expr
 	= IExpr PosTok
@@ -161,6 +173,23 @@ parseExpr programText = case lexer programText of
 		Left err -> Left $ Parse err
 		Right expr -> Right expr
 
+parseExprDefs :: String -> ThrowsError [ExprDef]
+parseExprDefs program = case lexer program of
+	Left err -> Left err
+	Right toks -> case parse pExprDefs "Expr Def" toks of
+		Left err -> Left $ Parse err
+		Right defs -> Right defs
+
+pExprDefs = do
+	defs <- endBy pExprDef (tflTok SEMICOLON)
+	return defs
+
+pExprDef = do
+	idents <- many1 pIExpr
+	tflTok EQUAL
+	expr <- pExpr
+	return $ exprDef idents expr
+
 pParens toParse = do
 	tflTok LPAREN
 	v <- toParse
@@ -175,7 +204,6 @@ pApExpr = do
 	sExpr <- pSExpr
 	expr <- pExpr
 	return $ ApExpr sExpr expr
-
 
 pSExpr = do
 	expr <- pParens pExpr

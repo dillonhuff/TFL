@@ -22,6 +22,7 @@ tests = TestList
 	,lexer_rparen
 	,lexer_lambda
 	,lexer_dot
+	,lexer_semicolon
 	,lexer_overlapResAndId
 	,lexer_plus
 	,lexer_minus
@@ -77,6 +78,9 @@ lexer_lambda =
 
 lexer_dot =
 	tokenTest "." [DOT]
+
+lexer_semicolon =
+	tokenTest ";" [SEMICOLON]
 
 lexer_overlapResAndId =
 	tokenTest "letter" [(I "letter")]

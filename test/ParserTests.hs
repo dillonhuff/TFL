@@ -41,7 +41,9 @@ tests = TestList
 	,typeOfExpr_AndExpr
 	,typeOfExpr_OrExpr
 	,typeOfExpr_IfComp
-	,typeOfExpr_ArithAndBool]
+	,typeOfExpr_ArithAndBool
+	,parseExprDefs_NumDef
+	,parseExprDefs_Func]
 
 parseExpr_IExpr =
 	parseExprTest "n12" (dummyIExpr "n12")
@@ -143,3 +145,16 @@ exprTypeTest input expected = TestCase
 	(assertEqual ("Input: " ++ show input)
 		expected
 		(extractValue $ typeOfExpr input))
+
+parseExprDefs_NumDef =
+	exprDefTest "k = 12;" [exprDef [dummyIExpr "k"] (dummyNumExpr 12)]
+
+parseExprDefs_Func =
+	exprDefTest "square x = * x x;"
+		[exprDef [dummyIExpr "square"] (dummyAbsExpr "x"
+			(ap (ap (dummyOpExpr "*") (dummyIExpr "x")) (dummyIExpr "x")))]
+
+exprDefTest input expected = TestCase
+	(assertEqual ("Input: " ++ show input)
+		expected
+		(extractValue $ parseExprDefs input))
