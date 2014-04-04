@@ -9,4 +9,4 @@ main = do
 	progText <- hGetContents handle
 	case parseExprDefs progText of
 		Left err -> putStrLn $ show err
-		Right defs -> putStrLn $ show $ evalProgram defs
+		Right defs -> putStrLn $ show $ typeOfProg defs

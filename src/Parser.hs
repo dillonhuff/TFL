@@ -2,6 +2,7 @@ module Parser(
 	ExprDef,
 	parseExprDefs,
 	exprDef,
+	typeOfProg,
 	Expr(IExpr, OpExpr, NumExpr, BoolExpr, AbsExpr, ApExpr, IfExpr, LetExpr),
 	arg1, arg2, numVal, boolVal, sub,
 	position,
@@ -10,6 +11,7 @@ module Parser(
 	dummyIExpr, dummyOpExpr, dummyNumExpr,
 	dummyBoolExpr, dummyAbsExpr, ifExpr, letExpr, ap) where
 
+import Data.List as L
 import ErrorHandling
 import Lexer
 import Text.Parsec
@@ -99,15 +101,35 @@ letExpr ident sub e = LetExpr ident sub e
 ap :: Expr -> Expr -> Expr
 ap t1 t2 = ApExpr t1 t2
 
+typeOfProgram :: String -> ThrowsError Type
+typeOfProgram exprStr = case parseExprDefs exprStr of
+	Left err -> Left err
+	Right parsedDefs -> Right $ typeOfProg parsedDefs
+
 typeOfExpr :: String -> ThrowsError Type
 typeOfExpr exprStr = case parseExpr exprStr of
 	Left err -> Left err
 	Right parsedExpr -> Right $ typeOf parsedExpr
 
+-- TODO: Refactor to be much less convoluted
+typeOfProg :: [ExprDef] -> Type
+typeOfProg defs = doSub sub mainTV
+	where
+		newVars = map (\(e, num) -> (fst e, TV ("t" ++ show num))) $ zip defs [0..(length defs - 1)]
+		defExprs = map snd defs
+		constraints = concat $ map (getTypeConstrs newVars) $ zip defExprs (map snd newVars)
+		mainTV = case lookup (dummyIExpr "main") newVars of
+			Just mVar -> mVar
+			Nothing -> error "Program has no main function"
+		sub = unify constraints
+
+getTypeConstrs :: [(Expr, Type)] -> (Expr, Type) -> [(Type, Type)]
+getTypeConstrs defVars (e, TV name) = typeConstraints defVars name e
+
 typeOf :: Expr -> Type
 typeOf expr = doSub sub (TV "t0")
 	where
-		constraints = typeConstraints expr
+		constraints = typeConstraints [] "t0" expr
 		sub = unify constraints
 
 predefinedOps =
@@ -124,13 +146,13 @@ predefinedOps =
 	,(dummyOpExpr "&&", Func BOOL (Func BOOL BOOL))
 	,(dummyOpExpr "||", Func BOOL (Func BOOL BOOL))]
 
-typeConstraints :: Expr -> [(Type, Type)]
-typeConstraints expr = tc expr "t0" predefinedOps
+typeConstraints :: [(Expr, Type)] -> String -> Expr -> [(Type, Type)]
+typeConstraints userDefined rootVarName expr = tc expr rootVarName (predefinedOps ++ userDefined)
 
 tc :: Expr -> String -> [(Expr, Type)] -> [(Type, Type)]
 tc e@(NumExpr _) typeVarName vars = [(TV typeVarName, INT)]
 tc e@(BoolExpr _) typeVarName vars = [(TV typeVarName, BOOL)]
-tc e@(OpExpr _) typeVarName vars = case lookup e vars of
+tc e@(OpExpr _) typeVarName vars = case L.lookup e vars of
 	Just t -> [(TV typeVarName, t)]
 	Nothing -> error $ show e ++ " is not a valid operator"
 tc e@(AbsExpr ident expr) tvName vars = (tc expr (tvName ++ "1") (newVar:vars)) ++ [absConstr, varConstr]
@@ -143,7 +165,7 @@ tc e@(AbsExpr ident expr) tvName vars = (tc expr (tvName ++ "1") (newVar:vars)) 
 		absConstr = (TV tvName, Func idVar termVar)
 tc e@(IExpr _) typeVarName vars = case lookup e vars of
 	Just t -> [(TV typeVarName, t)]
-	Nothing -> error "Not a closed term"
+	Nothing -> error $ show e ++ " is not defined\n" ++ show vars
 tc e@(ApExpr e1 e2) tvName vars = [apConstr] ++ e2Constrs ++ (tc e1 (tvName ++ "0") vars)
 	where
 		t1Var = TV (tvName ++ "0")
