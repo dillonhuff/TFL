@@ -45,6 +45,7 @@ sub toSub var (IfExpr cond e1 e2) =
 	IfExpr (sub toSub var cond)
 		(sub toSub var e1)
 		(sub toSub var e2)
+sub toSub var (LetExpr v s e) = LetExpr v (sub toSub var s) (sub toSub var e)
 sub toSub var e = if var == e
 	then toSub
 	else e
