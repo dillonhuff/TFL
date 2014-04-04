@@ -15,6 +15,7 @@ tests = TestList
 	,evalExpr_AbsSub
 	,evalExpr_BoolAbs
 	,evalExpr_ArithAbs
+	,evalExpr_ManyNestedAbs
 	,evalExpr_MinusNum
 	,evalExpr_PlusNum
 	,evalExpr_TimesNum
@@ -48,6 +49,11 @@ evalExpr_AbsSub = testStackEval "(\\k . k) 2" (dummyNumExpr 2)
 evalExpr_BoolAbs = testStackEval "(\\x. (|| x x)) True" (dummyBoolExpr True)
 
 evalExpr_ArithAbs = testStackEval "(\\x . (\\y . (+ x y))) 2 3" (dummyNumExpr 5)
+
+evalExpr_ManyNestedAbs =
+	testStackEval
+		"(\\x. (\\y . (* (- ((\\ u . u) 3)) (+ x y)))) 89 (- 23)"
+		(dummyNumExpr (-198))
 
 evalExpr_MinusNum = testStackEval "- 3" (dummyNumExpr (-3))
 

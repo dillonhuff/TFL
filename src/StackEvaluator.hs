@@ -33,6 +33,9 @@ pop (SM stk d h g) = SM (tail stk) ((head d - 1):(tail d)) h g{-if length d > 0
 curDepth :: StackM -> Int
 curDepth (SM _ d h g) = head d
 
+incDump :: StackM -> StackM
+incDump (SM stk d h g) = SM stk ((head d + 1):(tail d)) h g
+
 popDump :: StackM -> StackM
 popDump (SM stk d h g) = SM stk (tail d) h g
 
@@ -52,7 +55,7 @@ eval sm e = case e of
 	(ApExpr e1 _) -> eval (push e sm) e1
 	(AbsExpr _ _) -> doAbs e sm
 	(OpExpr _) -> doOp e sm
-	_ -> popDump $ push e sm
+	_ -> push e sm
 
 doIf :: Expr -> StackM -> StackM
 doIf (IfExpr cond e1 e2) sm = if boolVal $ evalExpr cond
@@ -63,12 +66,12 @@ doLet :: Expr -> StackM -> StackM
 doLet (LetExpr var e1 e2) sm = eval sm (sub e1 var e2)
 
 doAbs :: Expr -> StackM -> StackM
-doAbs e sm = if curDepth sm >= 1
+doAbs e sm = if (length $ stk sm) >= 1
 	then evalAbs e sm
 	else push e sm
 
 evalAbs :: Expr -> StackM -> StackM
-evalAbs (AbsExpr var e) sm = newStack
+evalAbs (AbsExpr var e) sm = newStack--error $ "Current stack depth is " ++ (show $ curDepth sm) ++ (show $ stk $ sm) --newStack
 	where
 		smArgEvaled = evalArg sm
 		arg = top smArgEvaled
@@ -124,7 +127,7 @@ evalArg sm = finalSM
 	where
 		arg = arg2 $ top sm
 		smWithNewDump = pushDump $ pop sm
-		finalSM = popDump $ eval smWithNewDump arg
+		finalSM = incDump $ popDump $ eval smWithNewDump arg
 
 -- Arithmetic operators
 negative :: Expr -> Expr
