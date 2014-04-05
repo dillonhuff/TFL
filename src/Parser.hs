@@ -148,7 +148,9 @@ predefinedOps =
 	,(dummyOpExpr "&&", Func BOOL (Func BOOL BOOL))
 	,(dummyOpExpr "||", Func BOOL (Func BOOL BOOL))
 	,(dummyIExpr "nil", (TV "a0"))
-	,(dummyIExpr "cons", Func (TV "a0") (Func (List (TV "a0")) (List (TV "a0"))))]
+	,(dummyIExpr "cons", Func (TV "a0") (Func (List (TV "a0")) (List (TV "a0"))))
+	,(dummyIExpr "head", Func (List (TV "a0")) (TV "a0"))
+	,(dummyIExpr "tail", Func (List (TV "a0")) (List (TV "a0")))]
 
 typeConstraints :: [(Expr, Type)] -> String -> Expr -> [(Type, Type)]
 typeConstraints userDefined rootVarName expr = tc expr rootVarName (predefinedOps ++ userDefined)
