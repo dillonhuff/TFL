@@ -1,6 +1,6 @@
 module TypeSystem(
 	unify, doSub,
-	Type(TV, INT, BOOL, Func)) where
+	Type(TV, INT, BOOL, Func, List)) where
 
 import Data.List
 
@@ -8,6 +8,7 @@ data Type
 	= TV String
 	| INT
 	| BOOL
+	| List Type
 	| Func Type Type
 	deriving (Eq)
 
@@ -18,6 +19,7 @@ showType (TV name) = name
 showType INT = "Int"
 showType BOOL = "Bool"
 showType (Func t1 t2) = "(" ++ show t1 ++ " -> " ++ show t2 ++ ")"
+showType (List t) = "[" ++ show t ++ "]"
 
 typeVar :: Type -> Bool
 typeVar (TV _) = True
@@ -39,6 +41,7 @@ doSub s t@(TV _) = case lookup t s of
 	Just subsT -> doSub (delete (t, subsT) s) subsT
 	Nothing -> t
 doSub s t@(Func t1 t2) = Func (doSub s t1) (doSub s t2)
+doSub s t@(List t1) = List (doSub s t1)
 doSub s t = t
 
 nextSub :: (Type, Type) -> Sub
@@ -49,6 +52,7 @@ nextSub _ = []
 
 nextTerms :: (Type, Type) -> [(Type, Type)]
 nextTerms (Func t1 t2, Func t3 t4) = [(t1, t3), (t2, t4)]
+nextTerms (List t1, List t2) = [(t1, t2)]
 nextTerms (TV n1, TV n2) = []
 nextTerms (s, TV n) = [(TV n, s)] -- Reversal
 nextTerms (s, t) = if (not $ typeVar s) && (not $ typeVar t)

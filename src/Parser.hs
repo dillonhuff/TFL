@@ -146,7 +146,9 @@ predefinedOps =
 	,(dummyOpExpr ">", Func INT (Func INT BOOL))
 	,(dummyOpExpr "~", Func BOOL BOOL)
 	,(dummyOpExpr "&&", Func BOOL (Func BOOL BOOL))
-	,(dummyOpExpr "||", Func BOOL (Func BOOL BOOL))]
+	,(dummyOpExpr "||", Func BOOL (Func BOOL BOOL))
+	,(dummyIExpr "nil", (TV "a0"))
+	,(dummyIExpr "cons", Func (TV "a0") (Func (List (TV "a0")) (List (TV "a0"))))]
 
 typeConstraints :: [(Expr, Type)] -> String -> Expr -> [(Type, Type)]
 typeConstraints userDefined rootVarName expr = tc expr rootVarName (predefinedOps ++ userDefined)
@@ -166,7 +168,7 @@ tc e@(AbsExpr ident expr) tvName vars = (tc expr (tvName ++ "1") (newVar:vars)) 
 		varConstr = (idVar, varName)
 		absConstr = (TV tvName, Func idVar termVar)
 tc e@(IExpr _) typeVarName vars = case lookup e vars of
-	Just t -> [(TV typeVarName, t)]
+	Just t -> [(TV typeVarName, polySub ("c" ++ typeVarName) t)]
 	Nothing -> error $ show e ++ " is not defined\n" ++ show vars
 tc e@(ApExpr e1 e2) tvName vars = [apConstr] ++ e2Constrs ++ (tc e1 (tvName ++ "0") vars)
 	where
@@ -191,6 +193,12 @@ tc e@(LetExpr var e1 e2) tvName vars = newConstrs ++ (tc e2 (tvName ++ "2") (new
 		e2Var = TV (tvName ++ "2")
 		newVar = (var, vart)
 		newConstrs = ((TV tvName, e2Var):(vart, e1Var):(tc e1 (tvName ++ "1") vars))
+
+polySub :: String -> Type -> Type
+polySub name (TV "a0") = (TV name)
+polySub name (Func t1 t2) = (Func (polySub name t1) (polySub name t2))
+polySub name (List t) = (List (polySub name t))
+polySub name t = t
 
 parseExpr :: String -> ThrowsError Expr
 parseExpr programText = case lexer programText of

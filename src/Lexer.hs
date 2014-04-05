@@ -2,7 +2,9 @@ module Lexer(
 	PosTok(PT), tok, pos, dummyPosTok,
 	num, bool,
 	lexer,
-	Tok(I, Num, Op, Boolean, LET, EQUAL, IN, IF, THEN, ELSE, LPAREN, RPAREN, LAMBDA, DOT, SEMICOLON),
+	Tok(I, Num, Op, Boolean, LET, EQUAL,
+		IN, IF, THEN, ELSE, LPAREN,
+		RPAREN, LAMBDA, DOT, SEMICOLON),
 	isOpTok, isNumTok, isIdTok, isBoolTok) where
 
 import ErrorHandling

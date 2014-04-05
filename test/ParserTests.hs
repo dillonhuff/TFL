@@ -42,6 +42,9 @@ tests = TestList
 	,typeOfExpr_OrExpr
 	,typeOfExpr_IfComp
 	,typeOfExpr_ArithAndBool
+	,typeOfExpr_Nil
+	,typeOfExpr_SimpleList
+	,typeOfExpr_ManyCons
 	,parseExprDefs_NumDef
 	,parseExprDefs_Func]
 
@@ -134,6 +137,14 @@ typeOfExpr_NotExpr = exprTypeTest "~" (Func BOOL BOOL)
 typeOfExpr_AndExpr = exprTypeTest "&&" (Func BOOL (Func BOOL BOOL))
 
 typeOfExpr_OrExpr = exprTypeTest "||" (Func BOOL (Func BOOL BOOL))
+
+typeOfExpr_Nil = exprTypeTest "nil" (TV "ct0")
+
+typeOfExpr_SimpleList = exprTypeTest "cons True nil" (List BOOL)
+
+typeOfExpr_ManyCons = exprTypeTest
+	"cons 3 (cons 4 (cons (-2) (cons (+ 1 (-1)) nil)))"
+	(List INT)
 
 typeOfExpr_IfComp =
 	exprTypeTest "if <= 12 2 then && True (|| False True) else True" BOOL
