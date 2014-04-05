@@ -47,6 +47,7 @@ tests = TestList
 	,typeOfExpr_ManyCons
 	,typeOfExpr_Head
 	,typeOfExpr_Tail
+	,typeOfExpr_NestedList
 	,parseExprDefs_NumDef
 	,parseExprDefs_Func]
 
@@ -151,6 +152,10 @@ typeOfExpr_ManyCons = exprTypeTest
 typeOfExpr_Head = exprTypeTest "head (cons 3 nil)" INT
 
 typeOfExpr_Tail = exprTypeTest "tail (cons (* 3 2) (cons 5 nil))" (List INT)
+
+typeOfExpr_NestedList = exprTypeTest
+	"head (cons (cons 2 nil) (cons (cons 3 (cons 4 (cons 5 nil))) nil))"
+	(List INT)
 
 typeOfExpr_IfComp =
 	exprTypeTest "if <= 12 2 then && True (|| False True) else True" BOOL
