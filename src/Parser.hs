@@ -8,7 +8,7 @@
 	position,
 	parseExpr,
 	typeOfExpr,
-	dummyIExpr, dummyOpExpr, dummyNumExpr, listExpr, nilExpr, tailExpr, headExpr,
+	dummyIExpr, dummyOpExpr, dummyNumExpr, listExpr, nilExpr, tailExpr, headExpr, isNil,
 	dummyBoolExpr, dummyAbsExpr, ifExpr, letExpr, ap) where
 
 import Data.List as L
@@ -116,6 +116,10 @@ headExpr e = error $ show e ++ " has no head"
 nilExpr :: Expr
 nilExpr = NILExpr
 
+isNil :: Expr -> Expr
+isNil NILExpr = dummyBoolExpr True
+isNil _ = dummyBoolExpr False
+
 ap :: Expr -> Expr -> Expr
 ap t1 t2 = ApExpr t1 t2
 
@@ -168,7 +172,8 @@ predefinedOps =
 	,(dummyIExpr "nil", (TV "a0"))
 	,(dummyIExpr "cons", Func (TV "a0") (Func (List (TV "a0")) (List (TV "a0"))))
 	,(dummyIExpr "head", Func (List (TV "a0")) (TV "a0"))
-	,(dummyIExpr "tail", Func (List (TV "a0")) (List (TV "a0")))]
+	,(dummyIExpr "tail", Func (List (TV "a0")) (List (TV "a0")))
+	,(dummyIExpr "isNil", Func (TV "a0") BOOL)]
 
 typeConstraints :: [(Expr, Type)] -> String -> Expr -> [(Type, Type)]
 typeConstraints userDefined rootVarName expr = tc expr rootVarName (predefinedOps ++ userDefined)
@@ -236,10 +241,11 @@ parseExprDefs program = case lexer program of
 		Right defs -> Right defs
 
 pExprDefs = do
-	defs <- endBy pExprDef (tflTok SEMICOLON)
+	defs <- many pExprDef
 	return defs
 
 pExprDef = do
+	tflTok DEF
 	idents <- many1 pIExpr
 	tflTok EQUAL
 	expr <- pExpr

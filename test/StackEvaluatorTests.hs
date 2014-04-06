@@ -39,7 +39,8 @@ tests = TestList
 	,evalExpr_LetAbsNotSameVar
 	,evalExpr_ConsExpr
 	,evalExpr_TailExpr
-	,evalExpr_HeadExpr]
+	,evalExpr_HeadExpr
+	,evalExpr_IsNil]
 
 evalExpr_Num = testStackEval "3" (dummyNumExpr 3)
 
@@ -129,6 +130,9 @@ evalExpr_ConsExpr =
 
 evalExpr_TailExpr =
 	testStackEval "tail (cons True (cons False nil))" (listExpr (dummyBoolExpr False) nilExpr)
+
+evalExpr_IsNil =
+	testStackEval "isNil nil" (dummyBoolExpr True)
 
 evalExpr_HeadExpr =
 	testStackEval "head (cons (cons 2 nil) (cons (cons 3 (cons 4 nil)) nil))"

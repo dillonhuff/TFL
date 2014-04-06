@@ -173,10 +173,10 @@ exprTypeTest input expected = TestCase
 		(extractValue $ typeOfExpr input))
 
 parseExprDefs_NumDef =
-	exprDefTest "k = 12;" [exprDef [dummyIExpr "k"] (dummyNumExpr 12)]
+	exprDefTest "def k = 12" [exprDef [dummyIExpr "k"] (dummyNumExpr 12)]
 
 parseExprDefs_Func =
-	exprDefTest "square x = * x x;"
+	exprDefTest "def square x = * x x"
 		[exprDef [dummyIExpr "square"] (dummyAbsExpr "x"
 			(ap (ap (dummyOpExpr "*") (dummyIExpr "x")) (dummyIExpr "x")))]
 

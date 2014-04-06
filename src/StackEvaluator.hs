@@ -108,7 +108,8 @@ builtinOps =
 	,(dummyOpExpr ">", binaryOp gt)
 	,(dummyIExpr "cons", binaryOp listExpr)
 	,(dummyIExpr "tail", unaryOp tailExpr)
-	,(dummyIExpr "head", unaryOp headExpr)]
+	,(dummyIExpr "head", unaryOp headExpr)
+	,(dummyIExpr "isNil", unaryOp isNil)]
 
 binaryOp :: (Expr -> Expr -> Expr) -> StackM -> StackM
 binaryOp op sm = newStack
