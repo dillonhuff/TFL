@@ -8,7 +8,7 @@
 	position,
 	parseExpr,
 	typeOfExpr,
-	dummyIExpr, dummyOpExpr, dummyNumExpr, listExpr, nilExpr,
+	dummyIExpr, dummyOpExpr, dummyNumExpr, listExpr, nilExpr, tailExpr, headExpr,
 	dummyBoolExpr, dummyAbsExpr, ifExpr, letExpr, ap) where
 
 import Data.List as L
@@ -104,6 +104,14 @@ letExpr ident sub e = LetExpr ident sub e
 listExpr :: Expr -> Expr -> Expr
 listExpr e l@(ListExpr _ _) = ListExpr e l
 listExpr e NILExpr = ListExpr e NILExpr
+
+tailExpr :: Expr -> Expr
+tailExpr (ListExpr _ t) = t
+tailExpr e = error $ show e ++ " not valid list"
+
+headExpr :: Expr -> Expr
+headExpr (ListExpr h _) = h
+headExpr e = error $ show e ++ " has no head"
 
 nilExpr :: Expr
 nilExpr = NILExpr
