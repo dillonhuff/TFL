@@ -9,7 +9,8 @@ import TypeSystem
 allParserTests = runTestTT tests
 
 tests = TestList
-	[parseExpr_IExpr
+	[parseExpr_NilExpr
+	,parseExpr_IExpr
 	,parseExpr_OpExpr
 	,parseExpr_NumExpr
 	,parseExpr_BoolExprTrue
@@ -50,6 +51,9 @@ tests = TestList
 	,typeOfExpr_NestedList
 	,parseExprDefs_NumDef
 	,parseExprDefs_Func]
+
+parseExpr_NilExpr =
+	parseExprTest "nil" (nilExpr)
 
 parseExpr_IExpr =
 	parseExprTest "n12" (dummyIExpr "n12")

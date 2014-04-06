@@ -62,7 +62,9 @@ eval sm e = case e of
 	(OpExpr _) -> doOp e sm
 	(IExpr _) -> case lookup e (userDefs sm) of
 		Just def -> eval sm def
-		Nothing -> error $ show e ++ " is not defined"
+		Nothing -> case lookup e (globals sm) of
+			Just def -> doOp e sm
+			Nothing -> (error $ show e ++ " is not defined")
 	_ -> push e sm
 
 doIf :: Expr -> StackM -> StackM
@@ -103,7 +105,8 @@ builtinOps =
 	,(dummyOpExpr "<=", binaryOp lte)
 	,(dummyOpExpr ">=", binaryOp gte)
 	,(dummyOpExpr "<", binaryOp lt)
-	,(dummyOpExpr ">", binaryOp gt)]
+	,(dummyOpExpr ">", binaryOp gt)
+	,(dummyIExpr "cons", binaryOp listExpr)]
 
 binaryOp :: (Expr -> Expr -> Expr) -> StackM -> StackM
 binaryOp op sm = newStack
@@ -175,3 +178,5 @@ gt e1 e2 = dummyBoolExpr (numVal e1 > numVal e2)
 
 lt :: Expr -> Expr -> Expr
 lt e1 e2 = dummyBoolExpr (numVal e1 < numVal e2)
+
+-- List manipulation functions

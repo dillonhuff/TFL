@@ -18,6 +18,7 @@ tests = TestList
 	,lexer_if
 	,lexer_then
 	,lexer_else
+	,lexer_nil
 	,lexer_lparen
 	,lexer_rparen
 	,lexer_lambda
@@ -66,6 +67,9 @@ lexer_then =
 
 lexer_else =
 	tokenTest "else" [ELSE]
+
+lexer_nil =
+	tokenTest "nil" [NIL]
 
 lexer_lparen =
 	tokenTest "(" [LPAREN]

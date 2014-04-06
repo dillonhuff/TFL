@@ -3,7 +3,7 @@ module Lexer(
 	num, bool,
 	lexer,
 	Tok(I, Num, Op, Boolean, LET, EQUAL,
-		IN, IF, THEN, ELSE, LPAREN,
+		IN, IF, THEN, ELSE, NIL, LPAREN,
 		RPAREN, LAMBDA, DOT, SEMICOLON),
 	isOpTok, isNumTok, isIdTok, isBoolTok) where
 
@@ -44,6 +44,7 @@ data Tok
 	| IF
 	| THEN
 	| ELSE
+	| NIL
 	| LPAREN
 	| RPAREN
 	| LAMBDA
@@ -71,7 +72,7 @@ isBoolTok _ = False
 
 resToTok =
 	[("let", LET), ("=", EQUAL), ("in", IN), ("if", IF)
-	,("then", THEN), ("else", ELSE), ("(", LPAREN)
+	,("then", THEN), ("else", ELSE), ("nil", NIL), ("(", LPAREN)
 	,(")", RPAREN), ("\\", LAMBDA), (".", DOT), (";", SEMICOLON)]
 
 lexer :: String -> ThrowsError [PosTok]

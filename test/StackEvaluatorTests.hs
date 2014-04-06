@@ -36,7 +36,8 @@ tests = TestList
 	,evalExpr_LetBoolOp
 	,evalExpr_LetIf
 	,evalExpr_LetAbs
-	,evalExpr_LetAbsNotSameVar]
+	,evalExpr_LetAbsNotSameVar
+	,evalExpr_ConsExpr]
 
 evalExpr_Num = testStackEval "3" (dummyNumExpr 3)
 
@@ -120,6 +121,9 @@ evalExpr_LetAbs =
 
 evalExpr_LetAbsNotSameVar =
 	testStackEval "let y = 3 in (\\t . y)" (dummyAbsExpr "t" (dummyNumExpr 3))
+
+evalExpr_ConsExpr =
+	testStackEval "cons 2 nil" (listExpr (dummyNumExpr 2) nilExpr)
 
 testStackEval input expected = TestCase
 	(assertEqual ("Input: " ++ show input)

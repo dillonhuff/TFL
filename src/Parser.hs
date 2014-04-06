@@ -1,14 +1,14 @@
-module Parser(
+ module Parser(
 	ExprDef,
 	parseExprDefs,
 	exprDef,
 	typeOfProgram,
-	Expr(IExpr, OpExpr, NumExpr, BoolExpr, AbsExpr, ApExpr, IfExpr, LetExpr),
+	Expr(IExpr, OpExpr, NumExpr, BoolExpr, AbsExpr, ApExpr, IfExpr, LetExpr, ListExpr, NILExpr),
 	arg1, arg2, numVal, boolVal, sub,
 	position,
 	parseExpr,
 	typeOfExpr,
-	dummyIExpr, dummyOpExpr, dummyNumExpr,
+	dummyIExpr, dummyOpExpr, dummyNumExpr, listExpr, nilExpr,
 	dummyBoolExpr, dummyAbsExpr, ifExpr, letExpr, ap) where
 
 import Data.List as L
@@ -36,6 +36,8 @@ data Expr
 	| ApExpr Expr Expr
 	| IfExpr Expr Expr Expr
 	| LetExpr Expr Expr Expr
+	| ListExpr Expr Expr
+	| NILExpr
 	deriving (Eq, Show)
 
 sub :: Expr -> Expr -> Expr -> Expr
@@ -47,6 +49,7 @@ sub toSub var (IfExpr cond e1 e2) =
 	IfExpr (sub toSub var cond)
 		(sub toSub var e1)
 		(sub toSub var e2)
+sub toSub var (ListExpr e1 e2) = ListExpr (sub toSub var e1) (sub toSub var e2)
 sub toSub var (LetExpr v s e) = LetExpr v (sub toSub var s) (sub toSub var e)
 sub toSub var e = if var == e
 	then toSub
@@ -97,6 +100,13 @@ ifExpr cond e1 e2 = IfExpr cond e1 e2
 
 letExpr :: Expr -> Expr -> Expr -> Expr
 letExpr ident sub e = LetExpr ident sub e
+
+listExpr :: Expr -> Expr -> Expr
+listExpr e l@(ListExpr _ _) = ListExpr e l
+listExpr e NILExpr = ListExpr e NILExpr
+
+nilExpr :: Expr
+nilExpr = NILExpr
 
 ap :: Expr -> Expr -> Expr
 ap t1 t2 = ApExpr t1 t2
@@ -195,6 +205,7 @@ tc e@(LetExpr var e1 e2) tvName vars = newConstrs ++ (tc e2 (tvName ++ "2") (new
 		e2Var = TV (tvName ++ "2")
 		newVar = (var, vart)
 		newConstrs = ((TV tvName, e2Var):(vart, e1Var):(tc e1 (tvName ++ "1") vars))
+tc NILExpr typeVarName vars = tc (dummyIExpr "nil") typeVarName vars
 
 polySub :: String -> Type -> Type
 polySub name (TV "a0") = (TV name)
@@ -243,6 +254,7 @@ pApExpr = do
 
 pSExpr = do
 	expr <- pParens pExpr
+		<|> pNilExpr
 		<|> pIExpr
 		<|> pOpExpr
 		<|> pNumExpr
@@ -251,6 +263,10 @@ pSExpr = do
 		<|> pIfExpr
 		<|> pLetExpr
 	return expr
+
+pNilExpr = do
+	tflTok NIL
+	return NILExpr
 
 pIExpr = do
 	ident <- idTok
