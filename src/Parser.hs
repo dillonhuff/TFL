@@ -218,7 +218,7 @@ tc e@(LetExpr var e1 e2) tvName vars = newConstrs ++ (tc e2 (tvName ++ "2") (new
 		e2Var = TV (tvName ++ "2")
 		newVar = (var, vart)
 		newConstrs = ((TV tvName, e2Var):(vart, e1Var):(tc e1 (tvName ++ "1") vars))
-tc NILExpr typeVarName vars = tc (dummyIExpr "nil") typeVarName vars
+tc NILExpr typeVarName vars = [] -- nil imposes no type restrictions
 
 polySub :: String -> Type -> Type
 polySub name (TV "a0") = (TV name)

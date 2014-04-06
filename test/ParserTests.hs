@@ -145,7 +145,7 @@ typeOfExpr_AndExpr = exprTypeTest "&&" (Func BOOL (Func BOOL BOOL))
 
 typeOfExpr_OrExpr = exprTypeTest "||" (Func BOOL (Func BOOL BOOL))
 
-typeOfExpr_Nil = exprTypeTest "nil" (TV "ct0")
+typeOfExpr_Nil = exprTypeTest "nil" (TV "t0")
 
 typeOfExpr_SimpleList = exprTypeTest "cons True nil" (List BOOL)
 
