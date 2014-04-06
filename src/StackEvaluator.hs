@@ -112,7 +112,9 @@ builtinOps =
 	,(dummyIExpr "isNil", unaryOp isNil)]
 
 binaryOp :: (Expr -> Expr -> Expr) -> StackM -> StackM
-binaryOp op sm = newStack
+binaryOp op sm = if curDepth sm >= 2
+	then newStack
+	else sm
 	where
 		smArg1Evaled = evalArg sm
 		arg1 = top smArg1Evaled
@@ -181,5 +183,3 @@ gt e1 e2 = dummyBoolExpr (numVal e1 > numVal e2)
 
 lt :: Expr -> Expr -> Expr
 lt e1 e2 = dummyBoolExpr (numVal e1 < numVal e2)
-
--- List manipulation functions

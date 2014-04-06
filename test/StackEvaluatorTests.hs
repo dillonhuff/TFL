@@ -16,6 +16,7 @@ tests = TestList
 	,evalExpr_BoolAbs
 	,evalExpr_ArithAbs
 	,evalExpr_ManyNestedAbs
+	,evalExpr_HighOrdFunc
 	,evalExpr_MinusNum
 	,evalExpr_PlusNum
 	,evalExpr_TimesNum
@@ -53,6 +54,8 @@ evalExpr_AbsSub = testStackEval "(\\k . k) 2" (dummyNumExpr 2)
 evalExpr_BoolAbs = testStackEval "(\\x. (|| x x)) True" (dummyBoolExpr True)
 
 evalExpr_ArithAbs = testStackEval "(\\x . (\\y . (+ x y))) 2 3" (dummyNumExpr 5)
+
+evalExpr_HighOrdFunc = testStackEval "(\\f . (\\x . (f x))) (* 2) 3" (dummyNumExpr 6)
 
 evalExpr_ManyNestedAbs =
 	testStackEval
@@ -105,7 +108,7 @@ evalExpr_SimpleIf =
 
 evalExpr_ComplicatedIf =
 	testStackEval
-		"if ~(~(|| (>= 2 (-(* 2 (-9))) False))) then 2 else + (-(+ (-2) (/ 6 (*2 3)))) (* 2 3)"
+		"if ~(~(|| (>= 2 (-(* 2 (-9)))) False)) then 2 else + (-(+ (-2) (/ 6 (*2 3)))) (* 2 3)"
 		(dummyNumExpr 7)
 
 evalExpr_SimpleLet =
