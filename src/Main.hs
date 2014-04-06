@@ -10,4 +10,6 @@ main = do
 	progText <- hGetContents handle
 	case typeOfProgram progText of
 		Left err -> putStrLn $ show $ err
-		Right t -> putStrLn $ show $ evalProgram $ extractValue $ parseExprDefs progText
+		Right t -> do
+			putStrLn $ show t
+			putStrLn $ show $ evalProgram $ extractValue $ parseExprDefs progText

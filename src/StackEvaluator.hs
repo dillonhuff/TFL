@@ -124,7 +124,9 @@ binaryOp op sm = if curDepth sm >= 2
 		newStack = push opRes $ pop smArg2Evaled
 
 unaryOp :: (Expr -> Expr) -> StackM -> StackM
-unaryOp op sm = newStack
+unaryOp op sm = if curDepth sm >= 1
+	then newStack
+	else sm
 	where
 		smArg1Evaled = evalArg sm
 		arg1 = top smArg1Evaled
