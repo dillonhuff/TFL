@@ -1,0 +1,35 @@
+def main = reverse
+	(concat
+		(cons 1 (cons 2 nil)) (map (* 2) (cons 2 (cons 7 (cons (* 3 (/ 1 1))
+		(cons (- (- (+ 4 3))) nil))))))
+
+def listEq6 = filter (== 6)
+
+def testHigh f l = f (head l)
+
+def map f l = if isNil l
+	then nil
+	else cons (f (head l)) (map f (tail l))
+
+def filter p l = if isNil l
+	then nil
+	else let e = head l in
+		if p e
+			then cons e (filter p (tail l))
+			else filter p (tail l)
+
+def len l = if isNil l
+	then 0
+	else + 1 (len (tail l))
+
+def concat front back = conc (reverse front) back
+
+def conc revFront back = if isNil revFront
+	then back
+	else conc (tail revFront) (cons (head revFront) back)
+
+def reverse l = rev l nil
+
+def rev l revL = if isNil l
+	then revL
+	else rev (tail l) (cons (head l) revL)
